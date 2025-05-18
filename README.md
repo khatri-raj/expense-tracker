@@ -44,7 +44,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Update Profile](Screenshots/Update_Profile.png)
 
 ### 🔐 Change Password  
-![Change Password](Screenshots/Change_Password.png)
+![Change Password](Screenshots/Update_Password.png)
 
 ### 🗂️ Category  
 ![Category](Screenshots/Category_Add.png)
