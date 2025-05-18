@@ -20,10 +20,10 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Login](Screenshots/Login.png)
 
 ### 📝 Signup
-![Dashboard](Screenshots/Dashboard.png)
+![Dashboard](Screenshots/Signup.png)
 
 ### 🏠 Dashboard  
-![Dashboard](Screenshots/Signup.png)
+![Dashboard](Screenshots/Dashboard.png)
 
 ### ➕ Add Income  
 ![Add Income](Screenshots/Add_Income.png)
