@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | Expense Tracker{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background: url('https://images.unsplash.com/photo-1459257831348-f0cdd359235f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') no-repeat center center fixed;
+    background-size: cover;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: inherit;
+    filter: blur(8px);
+    z-index: -1;
+  }
+  .dashboard-content.container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+  .card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.3s;
+  }
+  .card:hover {
+    transform: translateY(-5px);
+  }
+  .btn {
+    border-radius: 25px;
+    padding: 10px 25px;
+  }
+  .table {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .table thead {
+    background: #007bff;
+    color: white;
+  }
+  .pagination .page-link {
+    border-radius: 50%;
+    margin: 0 5px;
+  }
+  .alert {
+    border-radius: 10px;
+  }
+</style>
+
+{% if messages %}
+  <div class="container mt-4">
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+<script>
+  window.setTimeout(function() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      const bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+      bsAlert.close();
+    });
+  }, 2000);
+</script>
+
+<div class="dashboard-content container py-5 my-5">
+  <h2 class="mb-4 text-primary fw-bold">Welcome, {{ user.username }}!</h2>
+
+  <div class="row mb-5">
+    <div class="col-md-4 mb-3">
+      <div class="card text-white bg-success shadow-lg">
+        <div class="card-header fw-bold">Total Income</div>
+        <div class="card-body">
+          <h4 class="card-title">₹{{ total_income }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card text-white bg-danger shadow-lg">
+        <div class="card-header fw-bold">Total Expenses</div>
+        <div class="card-body">
+          <h4 class="card-title">₹{{ total_expense }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card text-white bg-primary shadow-lg">
+        <div class="card-header fw-bold">Balance</div>
+        <div class="card-body">
+          <h4 class="card-title">₹{{ balance }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="d-flex gap-3 mb-5">
+    <a href="{% url 'add_income' %}" class="btn btn-success fw-bold">Add Income</a>
+    <a href="{% url 'add_expense' %}" class="btn btn-danger fw-bold">Add Expense</a>
+  </div>
+
+  <hr class="my-5">
+
+  <h3 class="mb-4 fw-bold">Your Transactions</h3>
+  <form method="get" class="row g-3 mb-5">
+    <div class="col-md-3">
+      <label for="start_date" class="form-label fw-bold">Start Date</label>
+      <input type="date" id="start_date" name="start_date" class="form-control rounded-pill" value="{{ filter_values.start_date }}">
+    </div>
+    <div class="col-md-3">
+      <label for="end_date" class="form-label fw-bold">End Date</label>
+      <input type="date" id="end_date" name="end_date" class="form-control rounded-pill" value="{{ filter_values.end_date }}">
+    </div>
+    <div class="col-md-3">
+      <label for="category" class="form-label fw-bold">Category</label>
+      <select id="category" name="category" class="form-select rounded-pill">
+        <option value="">All</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if filter_values.category_id == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label for="type" class="form-label fw-bold">Type</label>
+      <select id="type" name="type" class="form-select rounded-pill">
+        <option value="">All</option>
+        <option value="Income" {% if filter_values.txn_type == 'Income' %}selected{% endif %}>Income</option>
+        <option value="Expense" {% if filter_values.txn_type == 'Expense' %}selected{% endif %}>Expense</option>
+      </select>
+    </div>
+    <div class="col-12 text-end mt-3">
+      <button type="submit" class="btn btn-primary fw-bold">Filter</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-secondary fw-bold">Clear</a>
+    </div>
+  </form>
+
+  <table class="table table-striped shadow-sm">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Type</th>
+        <th>Category</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for txn in page_obj %}
+      <tr>
+        <td>{{ txn.date }}</td>
+        <td>{{ txn.type }}</td>
+        <td>{{ txn.category.name }}</td>
+        <td>{{ txn.description }}</td>
+        <td>₹{{ txn.amount }}</td>
+        <td>
+          <a href="{% url 'edit_transaction' txn.id %}" class="btn btn-sm btn-warning rounded-pill">Edit</a>
+          <a href="{% url 'delete_transaction' txn.id %}" class="btn btn-sm btn-danger rounded-pill">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="text-center">No transactions found.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <nav aria-label="Page navigation" class="mt-4">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if filter_values.start_date %}start_date={{ filter_values.start_date }}&{% endif %}{% if filter_values.end_date %}end_date={{ filter_values.end_date }}&{% endif %}{% if filter_values.category_id %}category={{ filter_values.category_id }}&{% endif %}{% if filter_values.txn_type %}type={{ filter_values.txn_type }}&{% endif %}page={{ page_obj.previous_page_number }}" aria-label="Previous">‹</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">‹</span></li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?{% if filter_values.start_date %}start_date={{ filter_values.start_date }}&{% endif %}{% if filter_values.end_date %}end_date={{ filter_values.end_date }}&{% endif %}{% if filter_values.category_id %}category={{ filter_values.category_id }}&{% endif %}{% if filter_values.txn_type %}type={{ filter_values.txn_type }}&{% endif %}page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?{% if filter_values.start_date %}start_date={{ filter_values.start_date }}&{% endif %}{% if filter_values.end_date %}end_date={{ filter_values.end_date }}&{% endif %}{% if filter_values.category_id %}category={{ filter_values.category_id }}&{% endif %}{% if filter_values.txn_type %}type={{ filter_values.txn_type }}&{% endif %}page={{ page_obj.next_page_number }}" aria-label="Next">›</a>
+      </li>
+      {% else %}
+      <li class="page-item disabled"><span class="page-link">›</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}
