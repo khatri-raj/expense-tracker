@@ -23,19 +23,19 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Dashboard](Screenshots/Dashboard.png)
 
 ### 🏠 Dashboard  
-![Dashboard](Screenshots/Dashboard.png)
+![Dashboard](Screenshots/Signup.png)
 
 ### ➕ Add Income  
 ![Add Income](Screenshots/Add_Income.png)
 
 ### ➕ Add Expense  
-![Add Expense](Screenshots/Add_Expense.png)
+![Add Expense](Screenshots/Add_expense.png)
 
 ### ✏️ Edit Transaction  
-![Edit Transaction](Screenshots/Edit_Transaction.png)
+![Edit Transaction](Screenshots/Edit_Transactions.png)
 
 ### 🗑️ Delete Transaction  
-![Delete Transaction](Screenshots/Delete_Transaction.png)
+![Delete Transaction](Screenshots/Delete_Transactions.png)
 
 ### 📅 Filter Transactions  
 ![Filter Transactions](Screenshots/Filter.png)
