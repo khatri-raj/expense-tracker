@@ -20,7 +20,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Login](Screenshots/Login.png)
 
 ### 📝 Signup
-![Dashboard](Screenshots/Dashboard.png)
+![Dashboard](Screenshots/Signup.png)
 
 ### 🏠 Dashboard  
 ![Dashboard](Screenshots/Dashboard.png)
@@ -29,13 +29,13 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Add Income](Screenshots/Add_Income.png)
 
 ### ➕ Add Expense  
-![Add Expense](Screenshots/Add_Expense.png)
+![Add Expense](Screenshots/Add_expense.png)
 
 ### ✏️ Edit Transaction  
-![Edit Transaction](Screenshots/Edit_Transaction.png)
+![Edit Transaction](Screenshots/Edit_Transactions.png)
 
 ### 🗑️ Delete Transaction  
-![Delete Transaction](Screenshots/Delete_Transaction.png)
+![Delete Transaction](Screenshots/Delete_Transactions.png)
 
 ### 📅 Filter Transactions  
 ![Filter Transactions](Screenshots/Filter.png)
@@ -44,7 +44,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Update Profile](Screenshots/Update_Profile.png)
 
 ### 🔐 Change Password  
-![Change Password](Screenshots/Change_Password.png)
+![Change Password](Screenshots/Update_Password.png)
 
 ### 🗂️ Category  
 ![Category](Screenshots/Category_Add.png)
