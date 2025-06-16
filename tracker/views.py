@@ -182,3 +182,168 @@ def change_password(request):
     else:
         form = PasswordChangeForm(user=request.user)
     return render(request, 'change_password.html', {'form': form})
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, generics
+from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Sum
+from .models import Category, Transaction
+from django.contrib.auth.models import User
+from .serializers import CategorySerializer, TransactionSerializer, UserSerializer
+
+class StandardPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class CategoryListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = CategorySerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Category.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class TransactionListCreateAPIView(generics.ListCreateAPIView):
+    serializer_class = TransactionSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['date', 'category', 'type']
+    pagination_class = StandardPagination
+
+    def get_queryset(self):
+        queryset = Transaction.objects.filter(user=self.request.user).order_by('-date')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class TransactionDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+        serializer = TransactionSerializer(transaction)
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+        serializer = TransactionSerializer(transaction, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
+        transaction.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class DashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        # Get filter parameters
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        category_id = request.query_params.get('category_id')
+        txn_type = request.query_params.get('type')
+
+        # Base queryset
+        transactions = Transaction.objects.filter(user=user).order_by('-date')
+
+        # Apply filters
+        if start_date:
+            transactions = transactions.filter(date__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(date__lte=end_date)
+        if category_id:
+            transactions = transactions.filter(category_id=category_id)
+        if txn_type:
+            transactions = transactions.filter(type=txn_type)
+
+        # Calculate totals
+        total_income = transactions.filter(type='Income').aggregate(total=Sum('amount'))['total'] or 0
+        total_expense = transactions.filter(type='Expense').aggregate(total=Sum('amount'))['total'] or 0
+        balance = total_income - total_expense
+
+        # Serialize transactions with pagination
+        paginator = StandardPagination()
+        page_obj = paginator.paginate_queryset(transactions, request)
+        serializer = TransactionSerializer(page_obj, many=True)
+
+        return paginator.get_paginated_response({
+            'transactions': serializer.data,
+            'total_income': total_income,
+            'total_expense': total_expense,
+            'balance': balance,
+            'categories': CategorySerializer(Category.objects.filter(user=user), many=True).data
+        })
+    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from rest_framework.permissions import AllowAny  # Ensure this is imported
+from django.contrib.auth.models import User
+from .serializers import UserSerializer
+
+class SignupAPIView(APIView):
+    permission_classes = [AllowAny]  # Allow unauthenticated access
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = User.objects.create_user(
+                username=serializer.validated_data['username'],
+                email=serializer.validated_data['email'],
+                password=request.data['password']
+            )
+            user.save()
+            return Response({'message': 'Registration successful'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+
+class ProfileUpdateAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def put(self, request):
+        user = request.user
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+from django.contrib.auth.forms import PasswordChangeForm
+
+class ChangePasswordAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        form = PasswordChangeForm(user=request.user, data=request.data)
+        if form.is_valid():
+            form.save()
+            return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
