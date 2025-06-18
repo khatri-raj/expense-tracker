@@ -1,41 +1,34 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import api from '../api/axiosConfig';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { useAuth } from '../components/AuthContext';
 
 const AddExpense = () => {
   const [formData, setFormData] = useState({
     type: 'Expense',
-    category_id: '',
+    category: '',
     amount: '',
     date: '',
     description: '',
   });
-  const [categories, setCategories] = useState([]);
+  const { categories } = useAuth();
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await api.get('/api/categories/');
-        setCategories(response.data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-      }
-    };
-    fetchCategories();
-  }, []);
 
   const handleChange = (e) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setError(null);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await api.post('/api/transactions/', formData);
+      toast.success('Expense added successfully!');
       navigate('/dashboard');
     } catch (error) {
-      alert('Failed to add expense: ' + (error.response?.data?.detail || 'Unknown error'));
+      toast.error('Failed to add Expense: ' + (error.response?.data?.detail || 'Unknown error'));
     }
   };
 
@@ -43,24 +36,29 @@ const AddExpense = () => {
     <div>
       <div className="add-expense-container">
         <h2>Add Expense</h2>
+        {error && <div className="error-message">{error}</div>}
         <form onSubmit={handleSubmit} className="add-expense-form">
-          <div className="form-group">
-            <label>Category</label>
-            <select
-              name="category_id"
-              onChange={handleChange}
-              value={formData.category_id}
-              required
-              className="form-input"
-            >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
-          </div>
+<div className="form-group">
+  <label>Category</label>
+  <select
+    name="category_id"
+    onChange={handleChange}
+    value={formData.category_id}
+    required
+    className="form-input"
+  >
+    <option value="">Select Category</option>
+    {categories.length === 0 ? (
+      <option disabled>No categories available</option>
+    ) : (
+      categories.map((cat) => (
+        <option key={cat.id} value={cat.id}>
+          {cat.name}
+        </option>
+      ))
+    )}
+  </select>
+</div>
           <div className="form-group">
             <label>Amount</label>
             <input
@@ -144,6 +142,11 @@ const AddExpense = () => {
         }
         .btn:hover {
           background-color: #0056b3;
+        }
+        .error-message {
+          color: red;
+          margin-bottom: 10px;
+          font-size: 14px;
         }
       `}</style>
     </div>

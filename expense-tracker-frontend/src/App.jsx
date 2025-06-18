@@ -1,4 +1,6 @@
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './components/AuthContext';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -10,6 +12,7 @@ import AddExpense from './pages/AddExpense';
 import EditTransaction from './pages/EditTransaction';
 import Profile from './pages/Profile';
 import ChangePassword from './pages/ChangePassword';
+import CategoryManagement from './pages/CategoryManagement';
 import ProtectedRoute from './components/ProtectedRoute';
 import { isAuthenticated } from './utils/auth';
 
@@ -38,8 +41,10 @@ function App() {
             <Route path="/edit/:id" element={<EditTransaction />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/change-password" element={<ChangePassword />} />
+            <Route path="/categories" element={<CategoryManagement />} />
           </Route>
         </Routes>
+        <ToastContainer />
       </Router>
     </AuthProvider>
   );

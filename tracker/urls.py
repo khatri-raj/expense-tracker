@@ -3,7 +3,7 @@ from .views import (
     home, signup_view, login_view, logout_view, add_income, add_expense, dashboard,
     edit_transaction, delete_transaction, profile_update, change_password,
     CategoryListCreateAPIView, TransactionListCreateAPIView, TransactionDetailAPIView,
-    DashboardAPIView, SignupAPIView, ProfileUpdateAPIView, ChangePasswordAPIView  # Add this import
+    DashboardAPIView, SignupAPIView, ProfileUpdateAPIView, ChangePasswordAPIView, CategoryListCreateAPIView  # Add this import
 )
 
 urlpatterns = [

@@ -17,6 +17,11 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = ['id', 'type', 'category', 'category_id', 'amount', 'date', 'description']
 
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be positive.")
+        return value
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User

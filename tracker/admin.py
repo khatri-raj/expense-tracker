@@ -3,7 +3,7 @@ from .models import Category, Transaction
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ['id', 'name']
+    list_display = ['id', 'name', 'user']
     search_fields = ['name']
 
 @admin.register(Transaction)

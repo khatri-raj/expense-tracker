@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const EditTransaction = () => {
   const { id } = useParams();
@@ -48,10 +49,11 @@ const EditTransaction = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.put(`/api/transactions/${id}/`, formData);
+      await api.post('/api/transactions/', formData);
+      toast.success('Transaction Updated successfully!');
       navigate('/dashboard');
     } catch (error) {
-      alert('Failed to update transaction: ' + (error.response?.data?.detail || 'Unknown error'));
+      toast.error('Failed to Update Transactions: ' + (error.response?.data?.detail || 'Unknown error'));
     }
   };
 

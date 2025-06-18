@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import axios from 'axios';
+import api from '../api/axiosConfig'; // Use the configured api instance
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../components/AuthContext'; // Correct import path
+import { useAuth } from '../components/AuthContext';
 
 const Login = () => {
   const [formData, setFormData] = useState({ username: '', password: '' });
@@ -12,16 +12,19 @@ const Login = () => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await axios.post('http://localhost:8000/api/token/', formData);
-      login(response.data.access, response.data.refresh);
-      navigate('/dashboard');
-    } catch (error) {
-      alert('Login failed: ' + (error.response?.data?.detail || 'Unknown error'));
-    }
-  };
+// In Login.js
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await api.post('/api/token/', formData);
+    console.log('Tokens:', response.data); // Debug: Check if tokens are received
+    login(response.data.access, response.data.refresh);
+    navigate('/dashboard');
+  } catch (error) {
+    console.error('Login error:', error.response?.data); // Debug: Log error details
+    alert('Login failed: ' + (error.response?.data?.detail || 'Unknown error'));
+  }
+};
 
   return (
     <div>

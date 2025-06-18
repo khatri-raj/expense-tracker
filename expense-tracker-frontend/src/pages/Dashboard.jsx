@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
 import { Link } from 'react-router-dom';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+// Register Chart.js components
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -14,21 +19,28 @@ const Dashboard = () => {
     category_id: '',
     type: '',
   });
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchDashboardData = async () => {
-    try {
-      const query = new URLSearchParams(filters).toString();
-      const response = await api.get(`/api/dashboard/?${query}`);
-      const data = response.data.data; // Adjust based on paginated response
-      setTransactions(data.transactions);
-      setTotalIncome(data.total_income);
-      setTotalExpense(data.total_expense);
-      setBalance(data.balance);
-      setCategories(data.categories);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    }
-  };
+  try {
+    const query = new URLSearchParams({ ...filters, page }).toString();
+    const response = await api.get(`/api/dashboard/?${query}`);
+    const data = response.data.data;
+    setTransactions(data.transactions);
+    setTotalIncome(data.total_income);
+    setTotalExpense(data.total_expense);
+    setBalance(data.balance);
+    setCategories(data.categories);
+    setTotalPages(response.data.total_pages || 1);
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+  }
+};
+
+const handlePageChange = (newPage) => {
+  setPage(newPage);
+};
 
   useEffect(() => {
     fetchDashboardData();
@@ -36,6 +48,57 @@ const Dashboard = () => {
 
   const handleFilterChange = (e) => {
     setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  // Prepare data for chart
+  const chartData = {
+    labels: categories.map((cat) => cat.name),
+    datasets: [
+      {
+        label: 'Income',
+        data: categories.map((cat) =>
+          transactions
+            .filter((txn) => txn.type === 'Income' && txn.category?.id === cat.id)
+            .reduce((sum, txn) => sum + parseFloat(txn.amount), 0)
+        ),
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1,
+      },
+      {
+        label: 'Expense',
+        data: categories.map((cat) =>
+          transactions
+            .filter((txn) => txn.type === 'Expense' && txn.category?.id === cat.id)
+            .reduce((sum, txn) => sum + parseFloat(txn.amount), 0)
+        ),
+        backgroundColor: 'rgba(255, 99, 132, 0.6)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Income vs Expenses by Category',
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Amount (₹)',
+        },
+      },
+    },
   };
 
   return (
@@ -46,6 +109,10 @@ const Dashboard = () => {
           <h3>Balance: ₹{balance}</h3>
           <p>Total Income: ₹{totalIncome}</p>
           <p>Total Expense: ₹{totalExpense}</p>
+        </div>
+
+        <div className="chart-container">
+          <Bar data={chartData} options={chartOptions} />
         </div>
 
         <div className="filters">
@@ -146,7 +213,46 @@ const Dashboard = () => {
           </tbody>
         </table>
       </div>
+      <div className="pagination">
+  <button
+    disabled={page === 1}
+    onClick={() => handlePageChange(page - 1)}
+    className="pagination-btn"
+  >
+    Previous
+  </button>
+  <span>Page {page} of {totalPages}</span>
+  <button
+    disabled={page === totalPages}
+    onClick={() => handlePageChange(page + 1)}
+    className="pagination-btn"
+  >
+    Next
+  </button>
+</div>
       <style>{`
+        .pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  align-items: center;
+}
+.pagination-btn {
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.pagination-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.pagination-btn:hover:not(:disabled) {
+  background-color: #0056b3;
+}
         .dashboard-container {
           padding: 20px;
           max-width: 1200px;
@@ -166,6 +272,13 @@ const Dashboard = () => {
         .summary p {
           font-size: 16px;
           margin: 5px 0;
+        }
+        .chart-container {
+          margin-bottom: 20px;
+          padding: 20px;
+          background-color: white;
+          border-radius: 8px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .filters {
           display: flex;
