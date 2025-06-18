@@ -19,10 +19,12 @@ const EditTransaction = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Validate transaction ID
     if (!id || isNaN(parseInt(id))) {
       setError('Invalid transaction ID');
       setLoading(false);
       toast.error('Invalid transaction ID');
+      navigate('/dashboard');
       return;
     }
 
@@ -30,6 +32,7 @@ const EditTransaction = () => {
       setLoading(true);
       setError(null);
       try {
+        console.log(`Fetching transaction ID: ${id} for user`); // Debug
         const response = await api.get(`/api/transactions/${id}/`);
         console.log('Fetched transaction:', response.data); // Debug
         setFormData({
@@ -41,14 +44,16 @@ const EditTransaction = () => {
         });
       } catch (error) {
         console.error('Error fetching transaction:', error.response || error);
-        const errorMessage =
-          error.response?.data?.detail || 'Failed to load transaction';
-        setError(errorMessage);
-        toast.error(errorMessage);
-        if (error.response?.status === 401) {
+        let errorMessage = error.response?.data?.detail || 'Failed to load transaction';
+        if (error.response?.status === 404) {
+          errorMessage = `Transaction with ID ${id} does not exist or you do not have permission.`;
+          navigate('/dashboard'); // Redirect to dashboard
+        } else if (error.response?.status === 401) {
           logout();
           navigate('/login');
         }
+        setError(errorMessage);
+        toast.error(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -65,71 +70,42 @@ const EditTransaction = () => {
     e.preventDefault();
     if (!id || isNaN(parseInt(id))) {
       toast.error('Invalid transaction ID');
+      navigate('/dashboard');
       return;
     }
     if (parseFloat(formData.amount) <= 0) {
       toast.error('Amount must be positive');
       return;
     }
-
-    // Temporary: Use fetch to bypass axios interceptors for debugging
-    try {
-      const url = `http://localhost:8000/api/transactions/${id}/`;
-      console.log('Sending fetch PUT:', { url, data: formData }); // Debug
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`,
-        },
-        body: JSON.stringify(formData),
-      });
-      const responseData = await response.json();
-      console.log('Fetch response:', { status: response.status, data: responseData }); // Debug
-      if (!response.ok) {
-        throw new Error(
-          responseData.detail ||
-            responseData.non_field_errors?.[0] ||
-            responseData.category_id?.[0] ||
-            responseData.amount?.[0] ||
-            'Failed to update transaction'
-        );
-      }
-      toast.success('Transaction updated successfully!');
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Fetch error:', error.message, error); // Debug
-      toast.error(`Failed to update transaction: ${error.message}`);
-      if (error.message.includes('Unauthorized') || error.message.includes('401')) {
-        logout();
-        navigate('/login');
-      }
+    if (!formData.category_id) {
+      toast.error('Please select a category');
+      return;
     }
 
-    // Uncomment to revert to axios after confirming fetch works
-    /*
     try {
-      const url = `/api/transactions/${id}/`;
-      console.log('Sending axios PUT:', { url, data: formData }); // Debug
-      const response = await api.put(url, formData);
-      console.log('Axios response:', response.data); // Debug
+      console.log('Sending PUT request:', { url: `/api/transactions/${id}/`, data: formData }); // Debug
+      const response = await api.put(`/api/transactions/${id}/`, formData);
+      console.log('PUT response:', response.data); // Debug
       toast.success('Transaction updated successfully!');
       navigate('/dashboard');
     } catch (error) {
-      console.error('Axios error updating transaction:', error.response || error);
-      const errorMessage =
+      console.error('Error updating transaction:', error.response || error);
+      let errorMessage =
         error.response?.data?.detail ||
         error.response?.data?.non_field_errors?.[0] ||
         error.response?.data?.category_id?.[0] ||
         error.response?.data?.amount?.[0] ||
         'Failed to update transaction';
-      toast.error(`Failed to update transaction: ${errorMessage}`);
-      if (error.response?.status === 401) {
+      if (error.response?.status === 404) {
+        errorMessage = `Transaction with ID ${id} does not exist or you do not have permission.`;
+        navigate('/dashboard');
+      } else if (error.response?.status === 401) {
         logout();
         navigate('/login');
       }
+      toast.error(`Failed to update transaction: ${errorMessage}`);
+      setError(errorMessage);
     }
-    */
   };
 
   if (loading) {

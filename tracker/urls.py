@@ -3,7 +3,7 @@ from .views import (
     home, signup_view, login_view, logout_view, add_income, add_expense, dashboard,
     edit_transaction, delete_transaction, profile_update, change_password,
     CategoryListCreateAPIView, TransactionListCreateAPIView, TransactionDetailAPIView,
-    DashboardAPIView, SignupAPIView, ProfileUpdateAPIView, ChangePasswordAPIView, CategoryListCreateAPIView  # Add this import
+    DashboardAPIView, SignupAPIView, ProfileUpdateAPIView, ChangePasswordAPIView, CategoryDetailAPIView
 )
 
 urlpatterns = [
@@ -22,7 +22,7 @@ urlpatterns = [
     
     # API endpoints
     path('api/categories/', CategoryListCreateAPIView.as_view(), name='category_api'),
-    path('api/categories/<int:pk>/', CategoryListCreateAPIView.as_view(), name='category-detail'),
+    path('api/categories/<int:pk>/', CategoryDetailAPIView.as_view(), name='category_detail'),
     path('api/transactions/', TransactionListCreateAPIView.as_view(), name='transaction_list_create'),
     path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='transaction_detail'),
     path('api/dashboard/', DashboardAPIView.as_view(), name='dashboard_api'),

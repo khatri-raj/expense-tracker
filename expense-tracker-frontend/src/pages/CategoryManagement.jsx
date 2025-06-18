@@ -21,6 +21,7 @@ const CategoryManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log('Creating category:', formData); // Debug
       await api.post('/api/categories/', formData);
       toast.success('Category added successfully!');
       setFormData({ name: '' });
@@ -32,6 +33,7 @@ const CategoryManagement = () => {
         error.message ||
         'Unknown error';
       toast.error(`Failed to add category: ${errorMessage}`);
+      console.error('Error creating category:', error.response || error); // Debug
       if (error.response?.status === 401) {
         logout();
         navigate('/login');
@@ -41,6 +43,7 @@ const CategoryManagement = () => {
 
   const handleDelete = async (id) => {
     try {
+      console.log(`Sending DELETE request to /api/categories/${id}/`); // Debug
       await api.delete(`/api/categories/${id}/`);
       toast.success('Category deleted successfully!');
       await fetchCategories();
