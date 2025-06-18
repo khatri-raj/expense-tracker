@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axiosConfig';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { toast } from 'react-toastify';
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
@@ -21,33 +22,53 @@ const Dashboard = () => {
   });
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const fetchDashboardData = async () => {
-  try {
-    const query = new URLSearchParams({ ...filters, page }).toString();
-    const response = await api.get(`/api/dashboard/?${query}`);
-    const data = response.data.data;
-    setTransactions(data.transactions);
-    setTotalIncome(data.total_income);
-    setTotalExpense(data.total_expense);
-    setBalance(data.balance);
-    setCategories(data.categories);
-    setTotalPages(response.data.total_pages || 1);
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-  }
-};
+    setError(null);
+    try {
+      const query = new URLSearchParams({ ...filters, page }).toString();
+      console.log('Fetching dashboard with query:', query); // Debug
+      const response = await api.get(`/api/dashboard/?${query}`);
+      console.log('Dashboard response:', response.data); // Debug
+      const data = response.data.data;
+      if (!data || !Array.isArray(data.transactions)) {
+        throw new Error('Invalid response format');
+      }
+      setTransactions(data.transactions);
+      setTotalIncome(data.total_income || 0);
+      setTotalExpense(data.total_expense || 0);
+      setBalance(data.balance || 0);
+      setCategories(data.categories || []);
+      setTotalPages(response.data.total_pages || 1);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error.response || error);
+      let errorMessage = 'Failed to load dashboard data';
+      if (error.response?.status === 401) {
+        errorMessage = 'Session expired. Please log in again.';
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        navigate('/login');
+      } else if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail;
+      }
+      setError(errorMessage);
+      toast.error(errorMessage);
+    }
+  };
 
-const handlePageChange = (newPage) => {
-  setPage(newPage);
-};
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   useEffect(() => {
     fetchDashboardData();
-  }, [filters]);
+  }, [filters, page]); // Add page to dependencies
 
   const handleFilterChange = (e) => {
     setFilters((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    setPage(1); // Reset to page 1 on filter change
   };
 
   // Prepare data for chart
@@ -59,7 +80,7 @@ const handlePageChange = (newPage) => {
         data: categories.map((cat) =>
           transactions
             .filter((txn) => txn.type === 'Income' && txn.category?.id === cat.id)
-            .reduce((sum, txn) => sum + parseFloat(txn.amount), 0)
+            .reduce((sum, txn) => sum + parseFloat(txn.amount || 0), 0)
         ),
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         borderColor: 'rgba(75, 192, 192, 1)',
@@ -70,7 +91,7 @@ const handlePageChange = (newPage) => {
         data: categories.map((cat) =>
           transactions
             .filter((txn) => txn.type === 'Expense' && txn.category?.id === cat.id)
-            .reduce((sum, txn) => sum + parseFloat(txn.amount), 0)
+            .reduce((sum, txn) => sum + parseFloat(txn.amount || 0), 0)
         ),
         backgroundColor: 'rgba(255, 99, 132, 0.6)',
         borderColor: 'rgba(255, 99, 132, 1)',
@@ -105,10 +126,11 @@ const handlePageChange = (newPage) => {
     <div>
       <div className="dashboard-container">
         <h1>Dashboard</h1>
+        {error && <div className="error-message">{error}</div>}
         <div className="summary">
-          <h3>Balance: ₹{balance}</h3>
-          <p>Total Income: ₹{totalIncome}</p>
-          <p>Total Expense: ₹{totalExpense}</p>
+          <h3>Balance: ₹{balance.toFixed(2)}</h3>
+          <p>Total Income: ₹{totalIncome.toFixed(2)}</p>
+          <p>Total Expense: ₹{totalExpense.toFixed(2)}</p>
         </div>
 
         <div className="chart-container">
@@ -187,8 +209,8 @@ const handlePageChange = (newPage) => {
                   <td>{txn.date}</td>
                   <td>{txn.type}</td>
                   <td>{txn.category?.name || 'N/A'}</td>
-                  <td>₹{txn.amount}</td>
-                  <td>{txn.description}</td>
+                  <td>₹{parseFloat(txn.amount).toFixed(2)}</td>
+                  <td>{txn.description || '-'}</td>
                   <td>
                     <Link to={`/edit/${txn.id}`} className="action-link">
                       Edit
@@ -197,9 +219,11 @@ const handlePageChange = (newPage) => {
                       onClick={async () => {
                         try {
                           await api.delete(`/api/transactions/${txn.id}/`);
+                          toast.success('Transaction deleted successfully!');
                           fetchDashboardData();
                         } catch (error) {
                           console.error('Error deleting transaction:', error);
+                          toast.error('Failed to delete transaction');
                         }
                       }}
                       className="action-btn"
@@ -212,47 +236,32 @@ const handlePageChange = (newPage) => {
             )}
           </tbody>
         </table>
+
+        <div className="pagination">
+          <button
+            disabled={page === 1}
+            onClick={() => handlePageChange(page - 1)}
+            className="pagination-btn"
+          >
+            Previous
+          </button>
+          <span>Page {page} of {totalPages}</span>
+          <button
+            disabled={page === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+            className="pagination-btn"
+          >
+            Next
+          </button>
+        </div>
       </div>
-      <div className="pagination">
-  <button
-    disabled={page === 1}
-    onClick={() => handlePageChange(page - 1)}
-    className="pagination-btn"
-  >
-    Previous
-  </button>
-  <span>Page {page} of {totalPages}</span>
-  <button
-    disabled={page === totalPages}
-    onClick={() => handlePageChange(page + 1)}
-    className="pagination-btn"
-  >
-    Next
-  </button>
-</div>
       <style>{`
-        .pagination {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  align-items: center;
-}
-.pagination-btn {
-  padding: 8px 12px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.pagination-btn:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
-}
-.pagination-btn:hover:not(:disabled) {
-  background-color: #0056b3;
-}
+        .error-message {
+          color: red;
+          margin-bottom: 10px;
+          font-size: 14px;
+          text-align: center;
+        }
         .dashboard-container {
           padding: 20px;
           max-width: 1200px;
@@ -333,6 +342,28 @@ const handlePageChange = (newPage) => {
         }
         .action-link:hover, .action-btn:hover {
           color: #0056b3;
+        }
+        .pagination {
+          margin-top: 20px;
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          align-items: center;
+        }
+        .pagination-btn {
+          padding: 8px 12px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        }
+        .pagination-btn:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
+        .pagination-btn:hover:not(:disabled) {
+          background-color: #0056b3;
         }
       `}</style>
     </div>

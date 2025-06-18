@@ -95,20 +95,23 @@ LOGIN_URL = 'login_view'
 LOGIN_REDIRECT_URL = 'dashboard'
 
 CORS_ALLOWED_ORIGINS = [
-"http://localhost:3000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://192.168.1.3:3000",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend'
-    )
+    ],
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
 }
 
 from datetime import timedelta

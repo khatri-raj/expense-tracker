@@ -22,6 +22,7 @@ urlpatterns = [
     
     # API endpoints
     path('api/categories/', CategoryListCreateAPIView.as_view(), name='category_api'),
+    path('api/categories/<int:pk>/', CategoryListCreateAPIView.as_view(), name='category-detail'),
     path('api/transactions/', TransactionListCreateAPIView.as_view(), name='transaction_list_create'),
     path('api/transactions/<int:pk>/', TransactionDetailAPIView.as_view(), name='transaction_detail'),
     path('api/dashboard/', DashboardAPIView.as_view(), name='dashboard_api'),

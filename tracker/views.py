@@ -201,35 +201,6 @@ class StandardPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
-class CategoryListCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = CategorySerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        return Category.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class TransactionListCreateAPIView(generics.ListCreateAPIView):
-    serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['date', 'category', 'type']
-    pagination_class = StandardPagination
-
-    def get_queryset(self):
-        queryset = Transaction.objects.filter(user=self.request.user).order_by('-date')
-        start_date = self.request.query_params.get('start_date')
-        end_date = self.request.query_params.get('end_date')
-        if start_date:
-            queryset = queryset.filter(date__gte=start_date)
-        if end_date:
-            queryset = queryset.filter(date__lte=end_date)
-        return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class TransactionDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -240,59 +211,21 @@ class TransactionDetailAPIView(APIView):
         return Response(serializer.data)
 
     def put(self, request, pk):
+        print(f"Processing PUT for transaction ID: {pk}, user: {request.user}")  # Debug
+        print(f"Request data: {request.data}")  # Debug
         transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
         serializer = TransactionSerializer(transaction, data=request.data)
         if serializer.is_valid():
             serializer.save()
+            print(f"Updated transaction: {serializer.data}")  # Debug
             return Response(serializer.data)
+        print(f"Serializer errors: {serializer.errors}")  # Debug
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
         transaction = get_object_or_404(Transaction, pk=pk, user=request.user)
         transaction.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-class DashboardAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        # Get filter parameters
-        start_date = request.query_params.get('start_date')
-        end_date = request.query_params.get('end_date')
-        category_id = request.query_params.get('category_id')
-        txn_type = request.query_params.get('type')
-
-        # Base queryset
-        transactions = Transaction.objects.filter(user=user).order_by('-date')
-
-        # Apply filters
-        if start_date:
-            transactions = transactions.filter(date__gte=start_date)
-        if end_date:
-            transactions = transactions.filter(date__lte=end_date)
-        if category_id:
-            transactions = transactions.filter(category_id=category_id)
-        if txn_type:
-            transactions = transactions.filter(type=txn_type)
-
-        # Calculate totals
-        total_income = transactions.filter(type='Income').aggregate(total=Sum('amount'))['total'] or 0
-        total_expense = transactions.filter(type='Expense').aggregate(total=Sum('amount'))['total'] or 0
-        balance = total_income - total_expense
-
-        # Serialize transactions with pagination
-        paginator = StandardPagination()
-        page_obj = paginator.paginate_queryset(transactions, request)
-        serializer = TransactionSerializer(page_obj, many=True)
-
-        return paginator.get_paginated_response({
-            'transactions': serializer.data,
-            'total_income': total_income,
-            'total_expense': total_expense,
-            'balance': balance,
-            'categories': CategorySerializer(Category.objects.filter(user=user), many=True).data
-        })
     
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -348,29 +281,36 @@ class ChangePasswordAPIView(APIView):
             return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
     
-from rest_framework import generics, permissions
-from .models import Category
-from .serializers import CategorySerializer
 
 from rest_framework import generics, permissions
-from .models import Category
-from .serializers import CategorySerializer
 from rest_framework.exceptions import ValidationError
+from django.db.models import ProtectedError
+from .models import Category, Transaction
+from .serializers import CategorySerializer
 
 class CategoryListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = CategorySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        print(f"Fetching categories for user: {self.request.user}")  # Debug
         return Category.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):
+        print(f"Creating category for user: {self.request.user}")  # Debug
         serializer.save(user=self.request.user)
 
     def perform_destroy(self, instance):
-        if Transaction.objects.filter(category=instance).exists():
-            raise ValidationError("Cannot delete category because it is used in transactions.")
-        instance.delete()
+        try:
+            print(f"Attempting to delete category ID: {instance.id} for user: {self.request.user}")  # Debug
+            if Transaction.objects.filter(category=instance).exists():
+                raise ValidationError("Cannot delete category because it is used in transactions.")
+            instance.delete()
+        except ProtectedError:
+            raise ValidationError("Cannot delete category due to existing transactions.")
+        except Exception as e:
+            print(f"Delete error: {str(e)}")  # Debug
+            raise ValidationError(f"Failed to delete category: {str(e)}")
 
 class TransactionListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = TransactionSerializer
@@ -382,3 +322,64 @@ class TransactionListCreateAPIView(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+        
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from .models import Transaction, Category
+from .serializers import TransactionSerializer, CategorySerializer
+from django.db.models import Sum
+
+class DashboardAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        print(f"Fetching dashboard for user: {request.user}")  # Debug
+        # Get filters
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        category_id = request.query_params.get('category_id')
+        type_param = request.query_params.get('type')
+        page = int(request.query_params.get('page', 1))
+        page_size = 10  # Adjust as needed
+
+        # Filter transactions
+        transactions = Transaction.objects.filter(user=request.user)
+        if start_date:
+            transactions = transactions.filter(date__gte=start_date)
+        if end_date:
+            transactions = transactions.filter(date__lte=end_date)
+        if category_id:
+            transactions = transactions.filter(category_id=category_id)
+        if type_param:
+            transactions = transactions.filter(type=type_param)
+
+        # Pagination
+        total_transactions = transactions.count()
+        total_pages = (total_transactions + page_size - 1) // page_size
+        transactions = transactions[(page - 1) * page_size:page * page_size]
+
+        # Serialize data
+        transaction_serializer = TransactionSerializer(transactions, many=True)
+        categories = Category.objects.filter(user=request.user)
+        category_serializer = CategorySerializer(categories, many=True)
+
+        # Calculate totals
+        total_income = Transaction.objects.filter(
+            user=request.user, type='Income'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        total_expense = Transaction.objects.filter(
+            user=request.user, type='Expense'
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        balance = total_income - total_expense
+
+        return Response({
+            'data': {
+                'transactions': transaction_serializer.data,
+                'total_income': float(total_income),
+                'total_expense': float(total_expense),
+                'balance': float(balance),
+                'categories': category_serializer.data,
+            },
+            'total_pages': total_pages
+        })
