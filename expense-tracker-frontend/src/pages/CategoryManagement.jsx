@@ -10,7 +10,6 @@ const CategoryManagement = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log('CategoryManagement useEffect: Fetching categories'); // Debug
     fetchCategories();
   }, [fetchCategories]);
 
@@ -21,7 +20,6 @@ const CategoryManagement = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      console.log('Creating category:', formData); // Debug
       await api.post('/api/categories/', formData);
       toast.success('Category added successfully!');
       setFormData({ name: '' });
@@ -33,7 +31,6 @@ const CategoryManagement = () => {
         error.message ||
         'Unknown error';
       toast.error(`Failed to add category: ${errorMessage}`);
-      console.error('Error creating category:', error.response || error); // Debug
       if (error.response?.status === 401) {
         logout();
         navigate('/login');
@@ -43,7 +40,6 @@ const CategoryManagement = () => {
 
   const handleDelete = async (id) => {
     try {
-      console.log(`Sending DELETE request to /api/categories/${id}/`); // Debug
       await api.delete(`/api/categories/${id}/`);
       toast.success('Category deleted successfully!');
       await fetchCategories();
@@ -51,7 +47,6 @@ const CategoryManagement = () => {
       const errorMessage =
         error.response?.data?.detail || error.message || 'Unknown error';
       toast.error(`Failed to delete category: ${errorMessage}`);
-      console.error('Delete error:', error.response || error); // Debug
       if (error.response?.status === 401) {
         logout();
         navigate('/login');
@@ -61,17 +56,87 @@ const CategoryManagement = () => {
 
   return (
     <div>
-      <div className="category-container">
-        <h2>Manage Categories</h2>
-        {categoriesLoading && <div className="loading-message">Loading categories...</div>}
-        {categoriesError && (
-          <div className="error-message">
-            {categoriesError} <button onClick={fetchCategories}>Retry</button>
+      <div style={{
+        maxWidth: '400px',
+        margin: '80px auto',
+        padding: '25px',
+        backgroundColor: '#ffffff',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        borderRadius: '10px',
+        textAlign: 'center',
+        animation: 'slideIn 0.6s ease-out',
+      }}>
+        <h2 style={{
+          fontSize: '2rem',
+          color: '#2d3748',
+          marginBottom: '20px',
+          fontWeight: '700',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseOver={e => {
+          e.target.style.color = '#4a5568';
+          e.target.style.transform = 'scale(1.02)';
+        }}
+        onMouseOut={e => {
+          e.target.style.color = '#2d3748';
+          e.target.style.transform = 'scale(1)';
+        }}>
+          Manage Categories
+        </h2>
+        {categoriesLoading && (
+          <div style={{
+            color: '#3b82f6',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            Loading categories...
           </div>
         )}
-        <form onSubmit={handleSubmit} className="category-form">
-          <div className="form-group">
-            <label>Category Name</label>
+        {categoriesError && (
+          <div style={{
+            color: '#721c24',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            backgroundColor: '#f8d7da',
+            padding: '10px',
+            borderRadius: '6px',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            {categoriesError}{' '}
+            <button
+              onClick={fetchCategories}
+              style={{
+                color: '#3b82f6',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'color 0.3s ease',
+              }}
+              onMouseOver={e => e.target.style.color = '#2563eb'}
+              onMouseOut={e => e.target.style.color = '#3b82f6'}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        <form onSubmit={handleSubmit} style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+          marginBottom: '25px',
+        }}>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              color: '#2d3748',
+            }}>
+              Category Name
+            </label>
             <input
               name="name"
               type="text"
@@ -79,20 +144,117 @@ const CategoryManagement = () => {
               onChange={handleChange}
               value={formData.name}
               required
-              className="form-input"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                backgroundColor: '#f8fafc',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
-          <button type="submit" className="btn">Add Category</button>
+          <button
+            type="submit"
+            style={{
+              padding: '12px',
+              background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+            }}
+            onMouseOver={e => {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.5)';
+            }}
+            onMouseOut={e => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+            }}
+          >
+            Add Category
+          </button>
         </form>
-        <h3>Your Categories</h3>
+        <h3 style={{
+          fontSize: '1.5rem',
+          color: '#2d3748',
+          marginBottom: '15px',
+          fontWeight: '600',
+        }}>
+          Your Categories
+        </h3>
         {!categoriesLoading && !categoriesError && categories.length === 0 ? (
-          <p>No categories found</p>
+          <p style={{
+            fontSize: '1.1rem',
+            color: '#4a5568',
+            textAlign: 'center',
+          }}>
+            No categories found
+          </p>
         ) : (
-          <ul className="category-list">
+          <ul style={{
+            listStyle: 'none',
+            padding: '0',
+            textAlign: 'left',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            border: '1px solid #d1d5db',
+            borderRadius: '6px',
+            backgroundColor: '#f8fafc',
+          }}>
             {categories.map((cat) => (
-              <li key={cat.id}>
-                {cat.name}
-                <button onClick={() => handleDelete(cat.id)} className="delete-btn">
+              <li
+                key={cat.id}
+                style={{
+                  padding: '10px 15px',
+                  borderBottom: '1px solid #eee',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  transition: 'background-color 0.3s ease',
+                }}
+                onMouseOver={e => e.target.style.backgroundColor = '#e5e7eb'}
+                onMouseOut={e => e.target.style.backgroundColor = 'transparent'}
+              >
+                <span style={{ fontSize: '1rem', color: '#2d3748' }}>
+                  {cat.name}
+                </span>
+                <button
+                  onClick={() => handleDelete(cat.id)}
+                  style={{
+                    background: 'linear-gradient(45deg, #ef4444, #dc2626)',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
+                  }}
+                  onMouseOver={e => {
+                    e.target.style.transform = 'scale(1.05)';
+                    e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.5)';
+                  }}
+                  onMouseOut={e => {
+                    e.target.style.transform = 'scale(1)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                  }}
+                >
                   Delete
                 </button>
               </li>
@@ -101,76 +263,40 @@ const CategoryManagement = () => {
         )}
       </div>
       <style>{`
-        .category-container {
-          max-width: 400px;
-          margin: 50px auto;
-          padding: 20px;
-          background-color: white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          border-radius: 8px;
-          text-align: center;
+        @keyframes slideIn {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
-        .category-form {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
-          margin-bottom: 20px;
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        .form-group {
-          text-align: left;
-        }
-        .form-group label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
-        }
-        .form-input {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 14px;
-        }
-        .btn {
-          padding: 10px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-        .btn:hover {
-          background-color: #0056b3;
-        }
-        .category-list {
-          list-style: none;
-          padding: 0;
-          text-align: left;
-        }
-        .category-list li {
-          padding: 8px;
-          border-bottom: 1px solid #eee;
-        }
-        .delete-btn {
-          margin-left: 10px;
-          background-color: #dc3545;
-          color: white;
-          border: none;
-          padding: 5px 10px;
-          border-radius: 4px;
-          cursor: pointer;
-        }
-        .delete-btn:hover {
-          background-color: #c82333;
-        }
-        .error-message, .loading-message {
-          color: red;
-          margin-bottom: 10px;
-          font-size: 14px;
-        }
-        .loading-message {
-          color: blue;
+        @media (max-width: 768px) {
+          div[style*="maxWidth: 400px"] {
+            margin: 60px 15px;
+            padding: 15px;
+          }
+          h2 {
+            font-size: 1.8rem;
+          }
+          h3 {
+            font-size: 1.3rem;
+          }
+          input {
+            padding: 8px;
+            font-size: 0.9rem;
+          }
+          button {
+            padding: 10px;
+            font-size: 1rem;
+          }
+          ul {
+            max-height: 150px;
+          }
+          li {
+            padding: 8px 10px;
+            font-size: 0.9rem;
+          }
         }
       `}</style>
     </div>

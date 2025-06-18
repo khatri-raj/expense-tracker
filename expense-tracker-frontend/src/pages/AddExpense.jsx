@@ -1,18 +1,18 @@
 import { useState } from 'react';
 import api from '../api/axiosConfig';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../components/AuthContext';
 
 const AddExpense = () => {
   const [formData, setFormData] = useState({
     type: 'Expense',
-    category: '',
+    category_id: '',
     amount: '',
     date: '',
     description: '',
   });
-  const { categories } = useAuth();
+  const { categories, categoriesLoading, categoriesError, logout, fetchCategories } = useAuth();
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
@@ -28,39 +28,175 @@ const AddExpense = () => {
       toast.success('Expense added successfully!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error('Failed to add Expense: ' + (error.response?.data?.detail || 'Unknown error'));
+      const errorMessage = error.response?.data?.detail || 'Unknown error';
+      setError(errorMessage);
+      toast.error(`Failed to add expense: ${errorMessage}`);
+      if (error.response?.status === 401) {
+        logout();
+        navigate('/login');
+      }
     }
   };
 
   return (
     <div>
-      <div className="add-expense-container">
-        <h2>Add Expense</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit} className="add-expense-form">
-<div className="form-group">
-  <label>Category</label>
-  <select
-    name="category_id"
-    onChange={handleChange}
-    value={formData.category_id}
-    required
-    className="form-input"
-  >
-    <option value="">Select Category</option>
-    {categories.length === 0 ? (
-      <option disabled>No categories available</option>
-    ) : (
-      categories.map((cat) => (
-        <option key={cat.id} value={cat.id}>
-          {cat.name}
-        </option>
-      ))
-    )}
-  </select>
-</div>
-          <div className="form-group">
-            <label>Amount</label>
+      <div style={{
+        maxWidth: '400px',
+        margin: '80px auto',
+        padding: '25px',
+        backgroundColor: '#ffffff',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        borderRadius: '10px',
+        textAlign: 'center',
+        animation: 'slideIn 0.6s ease-out',
+      }}>
+        <h2 style={{
+          fontSize: '2rem',
+          color: '#2d3748',
+          marginBottom: '20px',
+          fontWeight: '700',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseOver={e => {
+          e.target.style.color = '#4a5568';
+          e.target.style.transform = 'scale(1.02)';
+        }}
+        onMouseOut={e => {
+          e.target.style.color = '#2d3748';
+          e.target.style.transform = 'scale(1)';
+        }}>
+          Add Expense
+        </h2>
+        {error && (
+          <div style={{
+            color: '#721c24',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            backgroundColor: '#f8d7da',
+            padding: '10px',
+            borderRadius: '6px',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            {error}
+          </div>
+        )}
+        {categoriesLoading && (
+          <div style={{
+            color: '#3b82f6',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            Loading categories...
+          </div>
+        )}
+        {categoriesError && (
+          <div style={{
+            color: '#721c24',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            backgroundColor: '#f8d7da',
+            padding: '10px',
+            borderRadius: '6px',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            {categoriesError}{' '}
+            <button
+              onClick={fetchCategories}
+              style={{
+                color: '#3b82f6',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                transition: 'color 0.3s ease',
+              }}
+              onMouseOver={e => e.target.style.color = '#2563eb'}
+              onMouseOut={e => e.target.style.color = '#3b82f6'}
+            >
+              Retry
+            </button>
+          </div>
+        )}
+        {!categoriesLoading && !categoriesError && categories.length === 0 && (
+          <div style={{
+            color: '#721c24',
+            marginBottom: '15px',
+            fontSize: '1.1rem',
+            backgroundColor: '#f8d7da',
+            padding: '10px',
+            borderRadius: '6px',
+            animation: 'fadeIn 0.5s ease-out',
+          }}>
+            No categories available.{' '}
+            <Link to="/categories" style={{
+              color: '#3b82f6',
+              textDecoration: 'none',
+              transition: 'color 0.3s ease',
+            }}
+            onMouseOver={e => e.target.style.color = '#2563eb'}
+            onMouseOut={e => e.target.style.color = '#3b82f6'}>
+              Add a category
+            </Link> first.
+          </div>
+        )}
+        <form onSubmit={handleSubmit} style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+        }}>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              color: '#2d3748',
+            }}>
+              Category
+            </label>
+            <select
+              name="category_id"
+              onChange={handleChange}
+              value={formData.category_id}
+              required
+              disabled={categoriesLoading || categoriesError || categories.length === 0}
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                backgroundColor: '#f8fafc',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              color: '#2d3748',
+            }}>
+              Amount
+            </label>
             <input
               name="amount"
               type="number"
@@ -68,85 +204,148 @@ const AddExpense = () => {
               onChange={handleChange}
               value={formData.amount}
               required
-              className="form-input"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                backgroundColor: '#f8fafc',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
-          <div className="form-group">
-            <label>Date</label>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              color: '#2d3748',
+            }}>
+              Date
+            </label>
             <input
               name="date"
               type="date"
               onChange={handleChange}
               value={formData.date}
               required
-              className="form-input"
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                backgroundColor: '#f8fafc',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
             />
           </div>
-          <div className="form-group">
-            <label>Description</label>
+          <div style={{ textAlign: 'left' }}>
+            <label style={{
+              display: 'block',
+              marginBottom: '8px',
+              fontWeight: '600',
+              fontSize: '1.1rem',
+              color: '#2d3748',
+            }}>
+              Description
+            </label>
             <textarea
               name="description"
               placeholder="Description"
               onChange={handleChange}
               value={formData.description}
-              className="form-textarea"
-            ></textarea>
+              style={{
+                width: '100%',
+                padding: '10px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                fontSize: '1rem',
+                transition: 'all 0.3s ease',
+                backgroundColor: '#f8fafc',
+                resize: 'vertical',
+                minHeight: '80px',
+              }}
+              onFocus={e => {
+                e.target.style.borderColor = '#3b82f6';
+                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
+              }}
+              onBlur={e => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
           </div>
-          <button type="submit" className="btn">
+          <button
+            type="submit"
+            style={{
+              padding: '12px',
+              background: 'linear-gradient(45deg, #ef4444, #dc2626)',
+              color: '#ffffff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '1.1rem',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
+            }}
+            onMouseOver={e => {
+              e.target.style.transform = 'scale(1.05)';
+              e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.5)';
+            }}
+            onMouseOut={e => {
+              e.target.style.transform = 'scale(1)';
+              e.target.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+            }}
+          >
             Add Expense
           </button>
         </form>
       </div>
       <style>{`
-        .add-expense-container {
-          max-width: 400px;
-          margin: 50px auto;
-          padding: 20px;
-          background-color: white;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          border-radius: 8px;
-          text-align: center;
+        @keyframes slideIn {
+          from { transform: translateY(-20px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
-        .add-expense-form {
-          display: flex;
-          flex-direction: column;
-          gap: 15px;
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        .form-group {
-          text-align: left;
-        }
-        .form-group label {
-          display: block;
-          margin-bottom: 5px;
-          font-weight: bold;
-        }
-        .form-input, .form-textarea {
-          width: 100%;
-          padding: 8px;
-          border: 1px solid #ccc;
-          border-radius: 4px;
-          font-size: 14px;
-        }
-        .form-textarea {
-          resize: vertical;
-          min-height: 80px;
-        }
-        .btn {
-          padding: 10px;
-          background-color: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-size: 16px;
-        }
-        .btn:hover {
-          background-color: #0056b3;
-        }
-        .error-message {
-          color: red;
-          margin-bottom: 10px;
-          font-size: 14px;
+        @media (max-width: 768px) {
+          div[style*="maxWidth: 400px"] {
+            margin: 60px 15px;
+            padding: 15px;
+          }
+          h2 {
+            font-size: 1.8rem;
+          }
+          input, select, textarea {
+            padding: 8px;
+            font-size: 0.9rem;
+          }
+          button {
+            padding: 10px;
+            font-size: 1rem;
+          }
         }
       `}</style>
     </div>
