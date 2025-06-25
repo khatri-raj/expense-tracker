@@ -1,13 +1,12 @@
 from pathlib import Path
-import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-key')
+SECRET_KEY = 'django-insecure-your-local-secret-key'  # Replace with environment variable in production
 
-DEBUG = os.environ.get('DEBUG') == 'True'
+DEBUG = True
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
+ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -28,7 +27,6 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -55,30 +53,16 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'expense_tracker.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'expense_db',
-#         'USER': 'postgres',
-#         'PASSWORD': 'Khatri@25',
-#         'HOST': 'localhost',
-#         'PORT': '5432',
-#     }
-# }
-from dotenv import load_dotenv
-load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT', '5432'),
+        'NAME': 'expense_db',
+        'USER': 'postgres',
+        'PASSWORD': 'Khatri@25',
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 AUTH_PASSWORD_VALIDATORS = [
     {
