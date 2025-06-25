@@ -65,8 +65,6 @@ WSGI_APPLICATION = 'expense_tracker.wsgi.application'
 #         'PORT': '5432',
 #     }
 # }
-from dotenv import load_dotenv
-load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
