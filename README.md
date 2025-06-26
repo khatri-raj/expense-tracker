@@ -39,7 +39,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Delete Transaction](Screenshots/Delete_Transactions.png)
 
 ### 📅 Filter Transactions  
-![Filter Transactions](Screenshots/Filter.png)
+![Filter Transactions](Screenshots/Dashboard3.png)
 
 ### 👤 Update Profile  
 ![Update Profile](Screenshots/Update_Profile.png)
