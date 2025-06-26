@@ -6,9 +6,10 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 
 ## 🌐 Live Demo
 
-🔗 [View Live Application](https://your-live-demo-link.com)  
-Frontend : https://expensetracker-frontend-08uj.onrender.com/
-Backend  : https://expense-tracker-backend-u02t.onrender.com/
+🔗 [View Live Application](https://expensetracker-frontend-08uj.onrender.com/)  
+🔗 [View Live Application Backend ](https://expense-tracker-backend-u02t.onrender.com/)
+))  
+
 ---
 
 ## 📸 Screenshots
