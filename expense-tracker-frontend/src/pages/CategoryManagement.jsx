@@ -55,17 +55,28 @@ const CategoryManagement = () => {
   };
 
   return (
-    <div>
+    <div style={{
+      background: `url("/assets/categories.jpg") center/cover no-repeat`,
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '20px',
+    }}>
       <div style={{
-        maxWidth: '400px',
-        margin: '80px auto',
-        padding: '25px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        borderRadius: '10px',
+        width: '100%',
+        maxWidth: '450px',
+        padding: '30px',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        borderRadius: '12px',
         textAlign: 'center',
         animation: 'slideIn 0.6s ease-out',
       }}>
+  
         <h2 style={{
           fontSize: '2rem',
           color: '#2d3748',

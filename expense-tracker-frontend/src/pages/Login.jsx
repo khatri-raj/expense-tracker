@@ -28,28 +28,36 @@ const Login = () => {
   };
 
   return (
-    <div>
+    <div style={{
+      background: `url("/assets/login.jpg") center/cover no-repeat`,
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '20px'
+    }}>
       <div style={{
-        maxWidth: '400px',
-        margin: '80px auto',
-        padding: '25px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        borderRadius: '10px',
-        textAlign: 'center',
-        animation: 'slideIn 0.6s ease-out',
-      }}>
+  maxWidth: '400px',
+  width: '100%',
+  padding: '30px',
+  backgroundColor: 'rgba(255, 255, 255, 0.2)', // semi-transparent white
+  boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+  borderRadius: '12px',
+  textAlign: 'center',
+  animation: 'slideIn 0.6s ease-out',
+  backdropFilter: 'blur(10px)', // ✨ glass effect
+  WebkitBackdropFilter: 'blur(10px)', // Safari support
+  border: '1px solid rgba(255, 255, 255, 0.3)', // frosted border
+}}>
+
         <h2 style={{
           fontSize: '2rem',
           color: '#2d3748',
           marginBottom: '20px',
           fontWeight: '700',
-          transition: 'all 0.3s ease',
         }}
-        onMouseOver={e => e.target.style.color = '#4a5568'}
-        onMouseOut={e => e.target.style.color = '#2d3748'}>
-          Login
-        </h2>
+        >Login</h2>
+
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
@@ -76,19 +84,11 @@ const Login = () => {
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease',
                 backgroundColor: '#f8fafc',
-              }}
-              onFocus={e => {
-                e.target.style.borderColor = '#3b82f6';
-                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
-              }}
-              onBlur={e => {
-                e.target.style.borderColor = '#d1d5db';
-                e.target.style.boxShadow = 'none';
               }}
             />
           </div>
+
           <div style={{ textAlign: 'left' }}>
             <label style={{
               display: 'block',
@@ -111,19 +111,11 @@ const Login = () => {
                 border: '1px solid #d1d5db',
                 borderRadius: '6px',
                 fontSize: '1rem',
-                transition: 'all 0.3s ease',
                 backgroundColor: '#f8fafc',
-              }}
-              onFocus={e => {
-                e.target.style.borderColor = '#3b82f6';
-                e.target.style.boxShadow = '0 0 8px rgba(59, 130, 246, 0.3)';
-              }}
-              onBlur={e => {
-                e.target.style.borderColor = '#d1d5db';
-                e.target.style.boxShadow = 'none';
               }}
             />
           </div>
+
           <button type="submit" style={{
             padding: '12px',
             background: 'linear-gradient(45deg, #3b82f6, #2563eb)',
@@ -133,7 +125,7 @@ const Login = () => {
             cursor: 'pointer',
             fontSize: '1.1rem',
             fontWeight: '500',
-            transition: 'all 0.3s ease',
+            transition: 'transform 0.2s, box-shadow 0.2s',
             boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
           }}
           onMouseOver={e => {
@@ -147,6 +139,7 @@ const Login = () => {
             Login
           </button>
         </form>
+
         <p style={{
           marginTop: '15px',
           fontSize: '1rem',
@@ -156,7 +149,7 @@ const Login = () => {
           <Link to="/register" style={{
             color: '#3b82f6',
             textDecoration: 'none',
-            transition: 'color 0.3s ease',
+            fontWeight: '500',
           }}
           onMouseOver={e => e.target.style.color = '#2563eb'}
           onMouseOut={e => e.target.style.color = '#3b82f6'}>
@@ -164,18 +157,15 @@ const Login = () => {
           </Link>
         </p>
       </div>
+
       <style>{`
         @keyframes slideIn {
           from { transform: translateY(-20px); opacity: 0; }
           to { transform: translateY(0); opacity: 1; }
         }
         @media (max-width: 768px) {
-          div[style*="maxWidth: 400px"] {
-            margin: 60px 15px;
-            padding: 15px;
-          }
           h2 {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
           }
           input {
             padding: 8px;

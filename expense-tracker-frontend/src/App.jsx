@@ -3,6 +3,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { AuthProvider } from './components/AuthContext';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -20,31 +21,36 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Navbar />
-        <Routes>
-          <Route
-            path="/"
-            element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Home />}
-          />
-          <Route
-            path="/login"
-            element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />}
-          />
-          <Route
-            path="/register"
-            element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Register />}
-          />
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/add-income" element={<AddIncome />} />
-            <Route path="/add-expense" element={<AddExpense />} />
-            <Route path="/edit/:id" element={<EditTransaction />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/change-password" element={<ChangePassword />} />
-            <Route path="/categories" element={<CategoryManagement />} />
-          </Route>
-        </Routes>
-        <ToastContainer />
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+          <Navbar />
+          <main style={{ flex: '1 0 auto' }}>
+            <Routes>
+              <Route
+                path="/"
+                element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Home />}
+              />
+              <Route
+                path="/login"
+                element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Login />}
+              />
+              <Route
+                path="/register"
+                element={isAuthenticated() ? <Navigate to="/dashboard" replace /> : <Register />}
+              />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/add-income" element={<AddIncome />} />
+                <Route path="/add-expense" element={<AddExpense />} />
+                <Route path="/edit/:id" element={<EditTransaction />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/change-password" element={<ChangePassword />} />
+                <Route path="/categories" element={<CategoryManagement />} />
+              </Route>
+            </Routes>
+          </main>
+          <Footer />
+          <ToastContainer />
+        </div>
       </Router>
     </AuthProvider>
   );

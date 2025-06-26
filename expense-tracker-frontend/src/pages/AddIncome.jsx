@@ -39,7 +39,20 @@ const AddIncome = () => {
   };
 
   return (
-    <div>
+
+      <div
+  style={{
+    background: `url("/assets/expense-bg.png") no-repeat center center`,
+    backgroundSize: 'cover',
+    minHeight: '100vh',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    paddingTop: '60px',
+    paddingBottom: '40px',
+  }}
+>
+
       <div style={{
         maxWidth: '400px',
         margin: '80px auto',

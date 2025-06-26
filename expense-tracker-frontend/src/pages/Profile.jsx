@@ -110,24 +110,33 @@ const Profile = () => {
   }
 
   return (
-    <div>
       <div style={{
-        maxWidth: '400px',
-        margin: '80px auto',
-        padding: '25px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        borderRadius: '10px',
-        textAlign: 'center',
-        animation: 'slideIn 0.6s ease-out',
-      }}>
-        <h2 style={{
-          fontSize: '2rem',
-          color: '#2d3748',
-          marginBottom: '20px',
-          fontWeight: '700',
-          transition: 'all 0.3s ease',
-        }}
+    background: `url("/assets/profile.jpg") center/cover no-repeat`,
+    minHeight: '100vh',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '20px',
+  }}>
+    <div style={{
+      maxWidth: '400px',
+      width: '100%',
+      padding: '30px',
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      backdropFilter: 'blur(10px)',
+      WebkitBackdropFilter: 'blur(10px)',
+      border: '1px solid rgba(255, 255, 255, 0.3)',
+      boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+      borderRadius: '12px',
+      textAlign: 'center',
+      animation: 'slideIn 0.6s ease-out',
+    }}>
+      <h2 style={{
+        fontSize: '2rem',
+        color: '#2d3748',
+        marginBottom: '20px',
+        fontWeight: '700',
+      }}
         onMouseOver={e => {
           e.target.style.color = '#4a5568';
           e.target.style.transform = 'scale(1.02)';
@@ -242,34 +251,26 @@ const Profile = () => {
         </form>
       </div>
       <style>{`
-        @keyframes slideIn {
-          from { transform: translateY(-20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+      @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      @media (max-width: 768px) {
+        h2 {
+          font-size: 1.6rem;
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        input {
+          padding: 8px;
+          font-size: 0.9rem;
         }
-        @media (max-width: 768px) {
-          div[style*="maxWidth: 400px"] {
-            margin: 60px 15px;
-            padding: 15px;
-          }
-          h2 {
-            font-size: 1.8rem;
-          }
-          input {
-            padding: 8px;
-            font-size: 0.9rem;
-          }
-          button {
-            padding: 10px;
-            font-size: 1rem;
-          }
+        button {
+          padding: 10px;
+          font-size: 1rem;
         }
-      `}</style>
-    </div>
-  );
+      }
+    `}</style>
+  </div>
+);
 };
 
 export default Profile;

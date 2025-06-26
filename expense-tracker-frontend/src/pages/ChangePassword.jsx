@@ -42,14 +42,24 @@ const ChangePassword = () => {
   };
 
   return (
-    <div>
+    <div style={{
+      background: `url("/assets/password.jpg") center/cover no-repeat`,
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: '20px',
+    }}>
       <div style={{
         maxWidth: '400px',
-        margin: '80px auto',
-        padding: '25px',
-        backgroundColor: '#ffffff',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        borderRadius: '10px',
+        width: '100%',
+        padding: '30px',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        border: '1px solid rgba(255, 255, 255, 0.3)',
+        boxShadow: '0 8px 24px rgba(0,0,0,0.2)',
+        borderRadius: '12px',
         textAlign: 'center',
         animation: 'slideIn 0.6s ease-out',
       }}>
@@ -70,6 +80,7 @@ const ChangePassword = () => {
         }}>
           Change Password
         </h2>
+  
         {error && (
           <div style={{
             color: '#721c24',
@@ -83,6 +94,7 @@ const ChangePassword = () => {
             {error}
           </div>
         )}
+  
         <form onSubmit={handleSubmit} style={{
           display: 'flex',
           flexDirection: 'column',
@@ -221,34 +233,34 @@ const ChangePassword = () => {
         </form>
       </div>
       <style>{`
-        @keyframes slideIn {
-          from { transform: translateY(-20px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
+      @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      @media (max-width: 768px) {
+        div[style*="maxWidth: 400px"] {
+          margin: 60px 15px;
+          padding: 15px;
         }
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
+        h2 {
+          font-size: 1.8rem;
         }
-        @media (max-width: 768px) {
-          div[style*="maxWidth: 400px"] {
-            margin: 60px 15px;
-            padding: 15px;
-          }
-          h2 {
-            font-size: 1.8rem;
-          }
-          input {
-            padding: 8px;
-            font-size: 0.9rem;
-          }
-          button {
-            padding: 10px;
-            font-size: 1rem;
-          }
+        input {
+          padding: 8px;
+          font-size: 0.9rem;
         }
-      `}</style>
-    </div>
-  );
+        button {
+          padding: 10px;
+          font-size: 1rem;
+        }
+      }
+    `}</style>
+  </div>
+);
 };
 
 export default ChangePassword;
