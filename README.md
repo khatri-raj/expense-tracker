@@ -1,6 +1,6 @@
 # 💰 Personal Expense Tracker
 
-Managing personal finances can be challenging. To simplify this, I built the **Personal Expense Tracker** using Django. It helps users easily **add, track, filter, and manage income and expenses** all in one place. Users can also update their profile, change passwords, and maintain full control over their financial data.
+Managing personal finances can be challenging. To simplify this, I built the Personal Expense Tracker using React (frontend) and Django (backend), with PostgreSQL as the database.. It helps users easily **add, track, filter, and manage income and expenses** all in one place. Users can also update their profile, change passwords, and maintain full control over their financial data.
 
 ---
 
