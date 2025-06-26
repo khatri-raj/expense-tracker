@@ -68,67 +68,78 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** HTML5, CSS3, Bootstrap
-- **Backend:** Python, Django
-- **Database:** MySQL
-- **Others:** Django Templates, Django Auth, Static Files
+- **Frontend:** React.js, HTML5, CSS3, Bootstrap
+- **Backend:** Python, Django, Django REST Framework
+- **Database:** PostgreSQL
+- **Others:** JWT Authentication, Axios, Django Templates (for admin only), Framer Motion (optional for UI)
 
 ---
 
 ## 📁 Project Structure
 
 Expense-Tracker/
-├── tracker/  
-│ ├── migrations/  
-│ ├── templates  
-│ ├── static/  
-│ ├── admin.py  
-│ ├── models.py  
-│ ├── views.py  
-│ ├── urls.py  
-│ └── forms.py  
-├── ExpenseTracker/  
-│ ├── settings.py  
-│ ├── urls.py  
-│ └── wsgi.py  
-├── manage.py  
-├── db.sqlite3  
-└── requirements.txt
+├── backend/
+│   ├── tracker/
+│   │   ├── migrations/
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── forms.py
+│   │   └── ...
+│   ├── ExpenseTracker/
+│   │   ├── settings.py
+│   │   ├── urls.py
+│   │   └── wsgi.py
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── ...
+├── expense-tracker-frontend/
+│   ├── public/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── App.js
+│   │   └── ...
+│   ├── package.json
+│   └── ...
+
 
 ---
 
 ## 🚀 Getting Started
 
 ### 🔧 Prerequisites
-
 - Python 3.7+
-- pip (Python package installer)
+- Node.js and npm
+- PostgreSQL
 
-### 💻 Installation Steps
+---
 
+### 💻 Backend Setup (Django + PostgreSQL)
 ```bash
-# 1. Clone the repository
 git clone https://github.com/khatri-raj/Expense-Tracker.git
-cd Expense-Tracker
+cd Expense-Tracker/backend
 
-# 2. Create and activate virtual environment
+# Create virtual environment
 python -m venv venv
 source venv/bin/activate      # On Windows: venv\Scripts\activate
 
-# 3. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 4. Apply migrations
-python manage.py makemigrations
+# Setup .env and configure DB
+# Run migrations
 python manage.py migrate
 
-# 5. Run the development server
-python manage.py runserver
-Then go to: http://127.0.0.1:8000
-
-🔐 Admin Access:
+# Create superuser and start server
 python manage.py createsuperuser
-Login at: http://127.0.0.1:8000/admin
+python manage.py runserver
+
+💻 Frontend Setup (React)
+cd ../frontend
+npm install
+npm start
+Frontend will st
 
 📦 Sample requirements.txt
 Django>=4.0,<5.0
