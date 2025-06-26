@@ -8,7 +8,6 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 
 🔗 [View Live Application](https://expensetracker-frontend-08uj.onrender.com/)  
 🔗 [View Live Application Backend ](https://expense-tracker-backend-u02t.onrender.com/)
-))  
 
 ---
 
@@ -25,6 +24,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 
 ### 🏠 Dashboard  
 ![Dashboard](Screenshots/Dashboard.png)
+![Dashboard](Screenshots/Dashboard2.png)
 
 ### ➕ Add Income  
 ![Add Income](Screenshots/Add_Income.png)
@@ -35,7 +35,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ### ✏️ Edit Transaction  
 ![Edit Transaction](Screenshots/Edit_Transactions.png)
 
-### 🗑️ Delete Transaction  
+### 🗂️ Manage Categories
 ![Delete Transaction](Screenshots/Delete_Transactions.png)
 
 ### 📅 Filter Transactions  
@@ -45,7 +45,7 @@ Managing personal finances can be challenging. To simplify this, I built the **P
 ![Update Profile](Screenshots/Update_Profile.png)
 
 ### 🔐 Change Password  
-![Change Password](Screenshots/Update_Password.png)
+![Change Password](Screenshots/Change_Password.png)
 
 ### 🗂️ Category  
 ![Category](Screenshots/Category_Add.png)
